@@ -12,7 +12,7 @@ post_id = str(sys.argv[1])
 
 df = get_comments(post_id)
 
-new_comment, generated_seed = run_lstm(df_comments, min_word_freq = 5, maxlen = 6, step = 2, epoch_num = 5, train = True, save = False )
+new_comment, generated_seed = run_lstm(df_comments, maxlen = 15, step = 3, epoch_num = 5, train = True, save = False )
 d_now = datetime.datetime.now()
 
 q_new_comment = """

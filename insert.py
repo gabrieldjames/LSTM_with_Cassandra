@@ -3,7 +3,7 @@ import pandas as pd
 from progressbar import Percentage, ProgressBar, Bar, ETA
 from db_connection import Connection
 from data_collection import pull_Reddit_Posts
-from comment_generator import run_lstm
+from comment_generation import run_lstm
 import datetime
 datetime.datetime.now()
 
@@ -76,7 +76,7 @@ print('Insert Complete')
 print()
 print('Training LSTM Model')
 
-new_comment, generated_seed = run_lstm(df_comments, min_word_freq = 5, maxlen = 6, step = 2, epoch_num = 5, train = True)
+new_comment, generated_seed = run_lstm(df_comments, maxlen = 15, step = 3, epoch_num = 5, train = True, save = True)
 d_now = datetime.datetime.now()
 
 q_new_comment = """

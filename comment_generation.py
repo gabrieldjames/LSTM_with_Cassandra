@@ -2,14 +2,14 @@
 import pandas as pd
 from keras.callbacks import LambdaCallback
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from keras.layers import LSTM
-from keras.optimizers import RMSprop
 from keras.callbacks.callbacks import ModelCheckpoint
 from keras.models import load_model
 import random
 import sys
 import numpy as np
+
 
 
 
@@ -19,8 +19,6 @@ def series_to_chars(s):
 		text = text + ' ' + s.iloc[i]
 
 	text_chars = [w for w in text]
-
-	print(len(text_chars))
 
 	return text, text_chars
 
@@ -43,8 +41,8 @@ def vectorize_sentence(text_chars, maxlen, step):
 		next_chars.append(text_chars[i + maxlen])
 
 
-	x = np.zeros((len(sentences), maxlen, len(chars)), dtype=np.bool)
-	y = np.zeros((len(sentences), len(chars)), dtype=np.bool)
+	x = np.zeros((len(sentences), maxlen, len(char_indices)), dtype=np.bool)
+	y = np.zeros((len(sentences), len(char_indices)), dtype=np.bool)
 	for i, sentence in enumerate(sentences):
 		for t, char in enumerate(sentence):
 			if(char in char_indices):
@@ -59,23 +57,29 @@ def vectorize_sentence(text_chars, maxlen, step):
 	return x, y, chars, sentences, char_indices, indices_char
 
 
-def train_model(x, y, epoch_num, save, maxlen, chars):
+def train_model(x, y, epoch_num, save, maxlen, char_indices):
 	#model = load_model('bot.h5')
 
 	model = Sequential()
-	model.add(LSTM(256, input_shape=(maxlen, len(chars))))
-	model.add(Dense(len(chars), activation='softmax'))
+	model.add(LSTM(256, input_shape=(maxlen, len(char_indices)), return_sequences=True))
+	model.add(Dropout(0.2))
+	model.add(LSTM(128, return_sequences=True))
+	model.add(Dropout(0.2))
+	model.add(LSTM(128, return_sequences=True))
+	model.add(Dropout(0.2))
+	model.add(LSTM(64))
+	model.add(Dropout(0.2))
+	model.add(Dense(len(char_indices), activation='softmax'))
 
-	optimizer = RMSprop(learning_rate=0.01)
-	model.compile(loss='categorical_crossentropy', optimizer = optimizer)
+	model.compile(loss='categorical_crossentropy', optimizer = 'adam')
 
 	if(save):
 		mc = ModelCheckpoint('bot.h5', monitor='val_accuracy', mode = 'min')
 		callbacks_list = [mc]
 
-		model.fit(x, y, batch_size = 128, epochs = epoch_num, callbacks=callbacks_list)
+		model.fit(x, y, batch_size = 32, epochs = epoch_num, callbacks=callbacks_list, verbose = 1)
 	else:
-		model.fit(x, y, batch_size = 128, epochs = epoch_num)
+		model.fit(x, y, batch_size = 32, epochs = epoch_num, verbose = 1)
 
 	return model
 
@@ -93,6 +97,7 @@ def sample(preds, temperature=1.0):
 def generate_comment(text, maxlen, chars, model, sentences, char_indices, indices_char):
 
 	new_comment = ''
+	generated = ''
 
 	start_index = random.randint(0, len(text)-maxlen-1)
 	sentence = text[start_index: start_index+maxlen]
@@ -100,8 +105,8 @@ def generate_comment(text, maxlen, chars, model, sentences, char_indices, indice
 	print('----- Generating with seed:"' + generated + '"')
 	sys.stdout.write(generated)
 
-	for i in range(400):
-		x_pred = np.zeros((1, maxlen, len(chars)))
+	for i in range(600):
+		x_pred = np.zeros((1, maxlen, len(char_indices)))
 		for t, char in enumerate(sentence):
 			x_pred[0, t, char_indices[char]] = 1
 
@@ -124,7 +129,7 @@ def run_lstm(df, maxlen, step, epoch_num, train, save = False):
 
 	x, y, chars, sentences, char_indices, indices_char = vectorize_sentence(text_chars, maxlen, step)
 	if(train):
-		model = train_model(x, y, epoch_num, save, maxlen, chars)
+		model = train_model(x, y, epoch_num, save, maxlen, char_indices)
 	else:
 		model = load_model('bot.h5')
 
