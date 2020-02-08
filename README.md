@@ -7,7 +7,7 @@ An LSTM trains on these comments, post by post, and generates a comment based on
 #### data_collection.py
 This script extracts Reddit comments from Askreddit posts, transforms the data for improved training time for the LSTM, and outputs a dataframe.
 
-#### comment_generator.py
+#### comment_generation.py
 This script takes in a dataframe, manipulates the Reddit comments field, and applies the LSTM model to the inputted text.  This script supports training and saving the model and training the model without saving (to enable comparing output of model for particular threads as model trains over time). 
 
 #### insert.py
