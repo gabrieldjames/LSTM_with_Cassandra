@@ -19,8 +19,5 @@ Inserts a comment generated from a particular post into the generated_comments t
 #### get_comments.py
 Provides functions for reading data from comments_by_user and comments_by_post tables
 
-#### db_connection.py
-Class for connecting to Cassandra database.
-
 #### reddit_chars.csv
 Contains character encodings for LSTM
