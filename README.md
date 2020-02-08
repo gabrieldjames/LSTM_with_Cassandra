@@ -22,5 +22,5 @@ Provides functions for reading data from comments_by_user and comments_by_post t
 #### db_connection.py
 Class for connecting to Cassandra database.
 
-#### char_data.csv
+#### reddit_chars.csv
 Contains character encodings for LSTM
