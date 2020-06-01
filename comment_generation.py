@@ -12,6 +12,9 @@ import numpy as np
 
 
 
+#convert string to list of words by splitting on ' ', used with .apply()
+#s: type String
+#returns: list of Strings (words)
 
 def series_to_chars(s):
 	text = ''
@@ -23,6 +26,18 @@ def series_to_chars(s):
 	return text, text_chars
 
 
+
+#represent characters of text as 1 or 0 in numpy arrays
+#text_chars: type list, all characters to be modeled on
+#maxlen: type int, max length of comment
+#step: type int, when training model, how many words skipped over to limit repeat of sequences
+#returns:
+	#x: type numpy array
+	#y: type numpy array
+	#chars: type list
+	#sentences: type list
+	#char_indices: type dictionary
+	#indices_char: type dictionary
 
 def vectorize_sentence(text_chars, maxlen, step):
 	chars = sorted(list(set(text_chars)))
@@ -57,6 +72,15 @@ def vectorize_sentence(text_chars, maxlen, step):
 	return x, y, chars, sentences, char_indices, indices_char
 
 
+#trains LSTM
+#x: type numpy array, X featureset
+#y: type numpy array, y
+#epoch_num: type int, number of epochs to train
+#save: type boolean, whether or not to save model
+#maxlen: type int, max length of comment
+#char_indices: type dictionary, integer encoding of characters
+#returns: type Keras model (LSTM)
+
 def train_model(x, y, epoch_num, save, maxlen, char_indices):
 	#model = load_model('bot.h5')
 
@@ -74,6 +98,7 @@ def train_model(x, y, epoch_num, save, maxlen, char_indices):
 	model.compile(loss='categorical_crossentropy', optimizer = 'adam')
 
 	if(save):
+		#save model
 		mc = ModelCheckpoint('bot.h5', monitor='val_accuracy', mode = 'min')
 		callbacks_list = [mc]
 
@@ -84,8 +109,10 @@ def train_model(x, y, epoch_num, save, maxlen, char_indices):
 	return model
 
 
+
+# helper function to sample an index from a probability array
+
 def sample(preds, temperature=1.0):
-	# helper function to sample an index from a probability array
 	preds = np.asarray(preds).astype('float64')
 	preds = np.log(preds) / temperature
 	exp_preds = np.exp(preds)
@@ -93,6 +120,18 @@ def sample(preds, temperature=1.0):
 	probas = np.random.multinomial(1, preds, 1)
 	return np.argmax(probas)
 
+
+
+#generates new comment
+#text: type String
+#maxlen: type int, max length of comment
+#chars: type list, all characters modeled on
+#model: Keras model
+#char_indices: type dictionary, integer encoding of characters (char -> int)
+#indices_char: type dictionary, character encoding of integers (int -> char)
+#returns:
+	#new_comment: type String
+	#generated: type String, seed for comment generation
 
 def generate_comment(text, maxlen, chars, model, sentences, char_indices, indices_char):
 
@@ -123,6 +162,17 @@ def generate_comment(text, maxlen, chars, model, sentences, char_indices, indice
 
 	return new_comment, generated
 
+
+
+#acts as main method, to be called in another script
+#df: type DataFrame
+#maxlen: type int, max length of comment
+#step: type int, number of words skipped over when adding a new set of words for training
+#epoch_num: number of epochs to train model with
+#save: type boolean, whether or not model is saved as .h5
+#returns:
+	#new_comment: String, new comment generated
+	#generated: String, seed for generated comment
 
 def run_lstm(df, maxlen, step, epoch_num, train, save = False):
 	text, text_chars = series_to_chars(df['comment'])

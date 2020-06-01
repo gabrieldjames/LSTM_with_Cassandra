@@ -7,11 +7,19 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
+
+
+#pull comments from Reddit using Praw, clean text, format columns
+#subreddit: type String, what subreddit to train on
+#num_posts: type int, how many hottest posts to pull from
+#comment_lim: type int, number of comments to pull
+#returns: type DataFrame
+
 def pull_Reddit_Posts(subreddit, num_posts = 1, comment_lim = 100):
 
 	print("Pulling comments from ", num_posts, " post(s) on <www.reddit.com/r/", subreddit, ">...", sep='')
 
-	reddit = praw.Reddit(client_id='vBPwE2meEKIqMg', client_secret='BKgyF6otTVkQnrXbC_v2WPndgdk', user_agent='LSTM_Trial')
+	reddit = praw.Reddit(client_id='vBPwE2meEKIqMg', client_secret='', user_agent='LSTM_Trial')
 
 	subreddit = reddit.subreddit(subreddit)
 
@@ -60,6 +68,11 @@ def pull_Reddit_Posts(subreddit, num_posts = 1, comment_lim = 100):
 
 	return df
 
+
+
+#light text cleaning for easier training, used with .apply()
+#text: type String
+#returns: type String
 
 def clean_text(text): #format text columns
     

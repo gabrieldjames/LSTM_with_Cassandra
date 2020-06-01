@@ -42,8 +42,9 @@ post_counts_prepped = connection.session.prepare(q_pc)
 #insert data into Cassandra
 print()
 print('Insert Comments:')
-bar1 = ProgressBar(maxval = len(df_comments), widgets=[Bar('=', '[', ']'), ' ', Percentage(), '  ', ETA()]).start()
+bar1 = ProgressBar(maxval = len(df_comments), widgets=[Bar('=', '[', ']'), ' ', Percentage(), '  ', ETA()]).start() #progress bar
 
+#execute queries for each comment
 for i in range(len(df_comments)):
 	
 	connection.session.execute(comments_prepped, (df_comments.iloc[i,0], df_comments.iloc[i,1], df_comments.iloc[i,2], df_comments.iloc[i,3], df_comments.iloc[i,4], df_comments.iloc[i,5], df_comments.iloc[i,6], 
@@ -60,8 +61,9 @@ bar1.finish()
 
 print()
 print('Insert Posts:')
-bar2 = ProgressBar(maxval = len(df_posts), widgets=[Bar('=', '[', ']'), ' ', Percentage(), '  ', ETA()]).start()
+bar2 = ProgressBar(maxval = len(df_posts), widgets=[Bar('=', '[', ']'), ' ', Percentage(), '  ', ETA()]).start() #progress bar
 
+#execute queries for each post
 for i in range(len(df_posts)):
 	connection.session.execute(posts_prepped, (df_posts.iloc[i,0], df_posts.iloc[i,1], df_posts.iloc[i,2], df_posts.iloc[i,3], df_posts.iloc[i,4], df_posts.iloc[i,5]))
 	bar2.update(i+1)
